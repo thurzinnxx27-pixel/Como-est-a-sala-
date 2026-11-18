@@ -47,6 +47,23 @@
         }
         .hero p { color: var(--text-muted); font-size: 15px; }
 
+        /* Cartões do Dashboard (Com a fonte elegante "circuluzinho") */
+        .dashboard-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .card {
+            background-color: var(--card-bg); 
+            border: 1px solid var(--border);
+            border-radius: 8px; 
+            padding: 20px;
+        }
+        .card h2 { 
+            font-family: 'Playfair Display', serif; /* Fonte elegante de volta */
+            font-size: 36px; 
+            font-weight: 400; 
+            color: #fff; 
+            line-height: 1; 
+        }
+        .card p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;}
+
         /* Formulário */
         .card-form {
             background-color: var(--card-bg);
@@ -163,6 +180,7 @@
         @media (max-width: 600px) {
             .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 0; }
             .hero h1 { font-size: 32px; }
+            .dashboard-cards { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -177,6 +195,18 @@
     <div class="hero">
         <h1>Como está a sala?</h1>
         <p>Preencha os dados abaixo ao final da sua aula para registrar as condições da sala de aula.</p>
+    </div>
+
+    <!-- CARTÕES DE STATUS (Adicionei um para mostrar o total de Turmas registradas) -->
+    <div class="dashboard-cards">
+        <div class="card">
+            <h2 id="count-relatorios">0</h2>
+            <p>Relatórios Enviados</p>
+        </div>
+        <div class="card">
+            <h2 id="count-turmas">0</h2>
+            <p>Turmas Diferentes</p>
+        </div>
     </div>
 
     <!-- FORMULÁRIO -->
@@ -196,16 +226,15 @@
             <div class="grid-3">
                 <div class="input-group">
                     <label>Turma</label>
+                    <!-- Campo de Turma bem destacado -->
                     <input type="text" id="turma" placeholder="Ex: 9º A" required>
                 </div>
                 <div class="input-group">
                     <label>Horário de Início</label>
-                    <!-- Campo de texto com formatação automática -->
                     <input type="text" id="hora-inicio" maxlength="5" placeholder="Ex: 1640" oninput="formatarHora(this)" required>
                 </div>
                 <div class="input-group">
                     <label>Horário de Término</label>
-                    <!-- Campo de texto com formatação automática -->
                     <input type="text" id="hora-fim" maxlength="5" placeholder="Ex: 1750" oninput="formatarHora(this)" required>
                 </div>
             </div>
@@ -245,34 +274,35 @@
     const form = document.getElementById('form-relatorio');
     const listaContainer = document.getElementById('lista-relatorios');
 
-    // --- FUNÇÃO MÁGICA DO HORÁRIO ---
-    // Ela apaga o que não for número e coloca os dois pontos no meio
+    // Função que formata o horário (1640 -> 16:40)
     function formatarHora(input) {
-        // Remove tudo que não for número
         let valor = input.value.replace(/\D/g, ''); 
-        
-        // Se tiver mais de 2 números, coloca o ":"
         if (valor.length > 2) {
             valor = valor.substring(0, 2) + ':' + valor.substring(2, 4);
         }
-        
-        // Atualiza a caixa de texto com o valor formatado
         input.value = valor;
     }
 
-    // Função para renderizar a lista na tela
+    // Função para atualizar os cartões do topo
+    function atualizarDashboard() {
+        document.getElementById('count-relatorios').innerText = relatorios.length;
+        
+        // Conta quantas turmas diferentes existem nos relatórios
+        const turmasUnicas = new Set(relatorios.map(rel => rel.turma.toUpperCase()));
+        document.getElementById('count-turmas').innerText = turmasUnicas.size;
+    }
+
+    // Função para renderizar o histórico
     function renderizarRelatorios() {
         listaContainer.innerHTML = '';
+        atualizarDashboard(); // Atualiza os números no topo
 
         if (relatorios.length === 0) {
             listaContainer.innerHTML = '<p style="color:var(--text-muted);">Nenhum relatório enviado ainda.</p>';
             return;
         }
 
-        // Mostra o mais recente primeiro
         [...relatorios].reverse().forEach((rel) => {
-            
-            // Define a cor de acordo com o status
             let corClasse = 'status-limpa';
             if (rel.status.includes('Suja')) corClasse = 'status-suja';
             if (rel.status.includes('Bagunçada')) corClasse = 'status-atencao';
@@ -303,20 +333,18 @@
         });
     }
 
-    // Evento de envio do formulário
+    // Evento de envio
     form.addEventListener('submit', (e) => {
-        e.preventDefault(); // Não recarrega a página
+        e.preventDefault(); 
 
         const inicio = document.getElementById('hora-inicio').value;
         const fim = document.getElementById('hora-fim').value;
 
-        // Validação simples para garantir que tem 5 caracteres (ex: 16:40)
         if(inicio.length !== 5 || fim.length !== 5){
             alert("Por favor, digite os dois horários completos (Ex: 1640).");
             return;
         }
 
-        // Pega os valores
         const novoRelatorio = {
             id: Date.now(),
             professor: document.getElementById('nome-professor').value,
@@ -329,20 +357,16 @@
             dataEnvio: new Date().toLocaleString('pt-BR')
         };
 
-        // Adiciona à lista e salva no navegador (LocalStorage)
         relatorios.push(novoRelatorio);
         localStorage.setItem('relatorios_sala_professores', JSON.stringify(relatorios));
 
-        // Limpa o formulário
         form.reset();
-
-        // Atualiza a tela
         renderizarRelatorios();
         
         alert("✅ Relatório enviado e salvo com sucesso!");
     });
 
-    // Renderiza os relatórios assim que a página carrega
+    // Renderiza ao carregar
     window.onload = renderizarRelatorios;
 </script>
 </body>
