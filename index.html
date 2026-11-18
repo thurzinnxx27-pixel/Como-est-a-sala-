@@ -55,9 +55,10 @@
             border-radius: 8px; 
             padding: 20px;
         }
+        /* Mantendo a fonte elegante com o "circuluzinho" nos números do topo */
         .card h2 { 
-            font-family: 'Playfair Display', serif; 
-            font-size: 36px; 
+            font-family: 'Playfair Display', serif !important; 
+            font-size: 38px; 
             font-weight: 400; 
             color: #fff; 
             line-height: 1; 
@@ -137,7 +138,7 @@
             padding: 20px;
             margin-bottom: 15px;
             animation: fadeIn 0.3s ease;
-            position: relative; /* Para posicionar o botão de excluir */
+            position: relative;
         }
 
         .relatorio-header {
@@ -147,7 +148,7 @@
             margin-bottom: 15px;
             flex-wrap: wrap;
             gap: 10px;
-            padding-right: 60px; /* Espaço para o botão */
+            padding-right: 60px; 
         }
 
         .relatorio-header h3 { color: #fff; font-size: 18px; font-weight: 500; }
@@ -177,7 +178,7 @@
             font-style: italic;
         }
 
-        /* Botão Excluir Individual */
+        /* Botões Excluir */
         .btn-excluir {
             position: absolute;
             top: 20px;
@@ -191,30 +192,15 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .btn-excluir:hover {
-            background-color: #f44336;
-            color: #fff;
-        }
+        .btn-excluir:hover { background-color: #f44336; color: #fff; }
 
-        /* Botão Limpar Tudo */
         .btn-limpar-tudo {
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 1px solid #f44336;
-            color: #f44336;
-            padding: 15px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            text-align: center;
-            transition: 0.2s;
+            display: block; width: 100%; background: transparent;
+            border: 1px solid #f44336; color: #f44336; padding: 15px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px;
+            text-align: center; transition: 0.2s;
         }
-        .btn-limpar-tudo:hover {
-            background-color: #f44336;
-            color: white;
-        }
+        .btn-limpar-tudo:hover { background-color: #f44336; color: white; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -238,7 +224,6 @@
         <p>Preencha os dados abaixo ao final da sua aula para registrar as condições da sala de aula.</p>
     </div>
 
-    <!-- CARTÕES DE STATUS -->
     <div class="dashboard-cards">
         <div class="card">
             <h2 id="count-relatorios">0</h2>
@@ -250,7 +235,6 @@
         </div>
     </div>
 
-    <!-- FORMULÁRIO -->
     <div class="card-form">
         <form id="form-relatorio">
             <div class="grid-2">
@@ -267,15 +251,16 @@
             <div class="grid-3">
                 <div class="input-group">
                     <label>Turma</label>
-                    <input type="text" id="turma" placeholder="Ex: 9º A" required>
+                    <!-- AQUI ESTÁ A MÁGICA DO CIRCULUZINHO NA TURMA -->
+                    <input type="text" id="turma" placeholder="Ex: 9A" oninput="formatarTurma(this, event)" required>
                 </div>
                 <div class="input-group">
                     <label>Horário de Início</label>
-                    <input type="text" id="hora-inicio" maxlength="5" placeholder="Ex: 1640" oninput="formatarHora(this)" required>
+                    <input type="text" id="hora-inicio" placeholder="Ex: 1640" oninput="formatarHora(this)" required>
                 </div>
                 <div class="input-group">
                     <label>Horário de Término</label>
-                    <input type="text" id="hora-fim" maxlength="5" placeholder="Ex: 1750" oninput="formatarHora(this)" required>
+                    <input type="text" id="hora-fim" placeholder="Ex: 1750" oninput="formatarHora(this)" required>
                 </div>
             </div>
 
@@ -299,27 +284,48 @@
         </form>
     </div>
 
-    <!-- HISTÓRICO -->
     <h2 class="historico-title">Últimos Relatórios</h2>
-    <div id="lista-relatorios">
-        <!-- Os relatórios aparecerão aqui -->
-    </div>
+    <div id="lista-relatorios"></div>
 
-    <!-- BOTÃO PARA LIMPAR TUDO -->
     <button class="btn-limpar-tudo" onclick="limparTodoHistorico()">🗑️ Apagar Todos os Relatórios</button>
 
 </div>
 
 <script>
-    // Carrega os relatórios salvos no navegador
     let relatorios = JSON.parse(localStorage.getItem('relatorios_sala_professores')) || [];
 
     const form = document.getElementById('form-relatorio');
     const listaContainer = document.getElementById('lista-relatorios');
 
-    // Função que formata o horário (1640 -> 16:40)
+    // --- MÁGICA 1: O CIRCULUZINHO NA TURMA (9 -> 9º) ---
+    function formatarTurma(input, event) {
+        // Se o usuário estiver apertando "Apagar" (backspace), deixa apagar normal para não travar
+        if (event && event.inputType && event.inputType.includes("delete")) return;
+
+        let valor = input.value.toUpperCase();
+        
+        // Verifica se o valor começa com número (ex: 9, 1, 12) e tem opcionalmente uma letra no final (A, B)
+        let match = valor.match(/^(\d+)\s*(?:º|ª)?\s*([A-Z]?)$/);
+        
+        if (match) {
+            let numero = match[1];
+            let letra = match[2];
+            
+            if (letra) {
+                // Se digitou a letra, vira "9º A"
+                input.value = numero + 'º ' + letra;
+            } else {
+                // Se digitou só o número, vira "9º"
+                input.value = numero + 'º';
+            }
+        }
+    }
+
+    // --- MÁGICA 2: OS DOIS PONTOS NO HORÁRIO (1640 -> 16:40) ---
     function formatarHora(input) {
         let valor = input.value.replace(/\D/g, ''); 
+        valor = valor.substring(0, 4);
+        
         if (valor.length > 2) {
             valor = valor.substring(0, 2) + ':' + valor.substring(2, 4);
         }
@@ -352,7 +358,6 @@
             const div = document.createElement('div');
             div.className = `relatorio-item ${corClasse}`;
             div.innerHTML = `
-                <!-- Botão de Excluir Individual -->
                 <button class="btn-excluir" onclick="excluirRelatorio(${rel.id})">Excluir</button>
                 
                 <div class="relatorio-header">
@@ -380,13 +385,8 @@
     // FUNÇÃO PARA EXCLUIR UM RELATÓRIO ESPECÍFICO
     window.excluirRelatorio = function(id) {
         if (confirm("Tem certeza que deseja excluir este relatório?")) {
-            // Filtra a lista, mantendo apenas os relatórios que têm ID diferente do que foi clicado
             relatorios = relatorios.filter(rel => rel.id !== id);
-            
-            // Salva a nova lista no navegador
             localStorage.setItem('relatorios_sala_professores', JSON.stringify(relatorios));
-            
-            // Atualiza a tela
             renderizarRelatorios();
         }
     }
@@ -394,8 +394,8 @@
     // FUNÇÃO PARA LIMPAR TODO O HISTÓRICO
     window.limparTodoHistorico = function() {
         if (confirm("⚠️ ATENÇÃO: Isso vai apagar TODOS os relatórios salvos. Deseja continuar?")) {
-            relatorios = []; // Esvazia a lista
-            localStorage.setItem('relatorios_sala_professores', JSON.stringify(relatorios)); // Salva lista vazia
+            relatorios = []; 
+            localStorage.setItem('relatorios_sala_professores', JSON.stringify(relatorios)); 
             renderizarRelatorios();
         }
     }
