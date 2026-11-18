@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Sala - Professores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            --accent: #4caf50;
+            --border: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .hero { margin-bottom: 30px; }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 400;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .hero p { color: var(--text-muted); font-size: 15px; }
+
+        /* Formulário */
+        .card-form {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+
+        .input-group { margin-bottom: 15px; }
+        label { 
+            display: block; 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            margin-bottom: 5px; 
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background-color: var(--bg-color); 
+            border: 1px solid var(--border);
+            color: #fff; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--accent); 
+        }
+
+        textarea { resize: vertical; min-height: 100px; }
+
+        button.btn-primary {
+            background-color: var(--accent); 
+            color: #fff; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 15px;
+            width: 100%;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        button.btn-primary:hover { background-color: #388e3c; }
+
+        /* Histórico */
+        .historico-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .relatorio-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .relatorio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .relatorio-header h3 { color: #fff; font-size: 18px; font-weight: 500; }
+        .relatorio-header .data-hora { color: var(--text-muted); font-size: 12px; }
+        
+        .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .badge {
+            background-color: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #ccc;
+            border: 1px solid #333;
+        }
+        
+        .status-limpa { border-left-color: #4caf50; }
+        .status-suja { border-left-color: #f44336; }
+        .status-organizada { border-left-color: #2196f3; }
+        .status-atencao { border-left-color: #ff9800; }
+
+        .relatorio-comentario {
+            background-color: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #bbb;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 0; }
+            .hero h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span>Registro de Aulas</span>
+        <span>Gestão Escolar</span>
+    </header>
+
+    <div class="hero">
+        <h1>Como está a sala?</h1>
+        <p>Preencha os dados abaixo ao final da sua aula para registrar as condições da sala de aula.</p>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div class="card-form">
+        <form id="form-relatorio">
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Nome do Professor</label>
+                    <input type="text" id="nome-professor" placeholder="Seu nome" required>
+                </div>
+                <div class="input-group">
+                    <label>Matéria</label>
+                    <input type="text" id="materia" placeholder="Ex: Matemática" required>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="input-group">
+                    <label>Turma</label>
+                    <input type="text" id="turma" placeholder="Ex: 9º A" required>
+                </div>
+                <div class="input-group">
+                    <label>Horário de Início</label>
+                    <!-- Campo de texto com formatação automática -->
+                    <input type="text" id="hora-inicio" maxlength="5" placeholder="Ex: 1640" oninput="formatarHora(this)" required>
+                </div>
+                <div class="input-group">
+                    <label>Horário de Término</label>
+                    <!-- Campo de texto com formatação automática -->
+                    <input type="text" id="hora-fim" maxlength="5" placeholder="Ex: 1750" oninput="formatarHora(this)" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Condição da Sala</label>
+                <select id="status-sala" required>
+                    <option value="">Selecione como a sala ficou...</option>
+                    <option value="Limpa e Organizada">Limpa e Organizada</option>
+                    <option value="Suja (Lixo no chão)">Suja (Lixo no chão)</option>
+                    <option value="Bagunçada (Carteiras fora do lugar)">Bagunçada (Carteiras fora do lugar)</option>
+                    <option value="Precisa de Atenção (Danos/Problemas)">Precisa de Atenção (Danos/Problemas)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Observações Adicionais</label>
+                <textarea id="comentario" placeholder="Escreva mais detalhes sobre como a sala ficou..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary">Enviar Relatório</button>
+        </form>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <h2 class="historico-title">Últimos Relatórios</h2>
+    <div id="lista-relatorios">
+        <!-- Os relatórios aparecerão aqui -->
+    </div>
+
+</div>
+
+<script>
+    // Carrega os relatórios salvos no navegador
+    let relatorios = JSON.parse(localStorage.getItem('relatorios_sala_professores')) || [];
+
+    const form = document.getElementById('form-relatorio');
+    const listaContainer = document.getElementById('lista-relatorios');
+
+    // --- FUNÇÃO MÁGICA DO HORÁRIO ---
+    // Ela apaga o que não for número e coloca os dois pontos no meio
+    function formatarHora(input) {
+        // Remove tudo que não for número
+        let valor = input.value.replace(/\D/g, ''); 
+        
+        // Se tiver mais de 2 números, coloca o ":"
+        if (valor.length > 2) {
+            valor = valor.substring(0, 2) + ':' + valor.substring(2, 4);
+        }
+        
+        // Atualiza a caixa de texto com o valor formatado
+        input.value = valor;
+    }
+
+    // Função para renderizar a lista na tela
+    function renderizarRelatorios() {
+        listaContainer.innerHTML = '';
+
+        if (relatorios.length === 0) {
+            listaContainer.innerHTML = '<p style="color:var(--text-muted);">Nenhum relatório enviado ainda.</p>';
+            return;
+        }
+
+        // Mostra o mais recente primeiro
+        [...relatorios].reverse().forEach((rel) => {
+            
+            // Define a cor de acordo com o status
+            let corClasse = 'status-limpa';
+            if (rel.status.includes('Suja')) corClasse = 'status-suja';
+            if (rel.status.includes('Bagunçada')) corClasse = 'status-atencao';
+            if (rel.status.includes('Atenção')) corClasse = 'status-organizada';
+
+            const div = document.createElement('div');
+            div.className = `relatorio-item ${corClasse}`;
+            div.innerHTML = `
+                <div class="relatorio-header">
+                    <div>
+                        <h3>${rel.professor}</h3>
+                        <span class="data-hora">Enviado em: ${rel.dataEnvio}</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge">Matéria: ${rel.materia}</span>
+                        <span class="badge">Turma: ${rel.turma}</span>
+                        <span class="badge">⏰ ${rel.horaInicio} às ${rel.horaFim}</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Status:</strong> <span style="color: ${corClasse === 'status-suja' ? '#f44336' : corClasse === 'status-atencao' ? '#ff9800' : '#4caf50'}">${rel.status}</span>
+                </div>
+                <div class="relatorio-comentario">
+                    "${rel.comentario}"
+                </div>
+            `;
+            listaContainer.appendChild(div);
+        });
+    }
+
+    // Evento de envio do formulário
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); // Não recarrega a página
+
+        const inicio = document.getElementById('hora-inicio').value;
+        const fim = document.getElementById('hora-fim').value;
+
+        // Validação simples para garantir que tem 5 caracteres (ex: 16:40)
+        if(inicio.length !== 5 || fim.length !== 5){
+            alert("Por favor, digite os dois horários completos (Ex: 1640).");
+            return;
+        }
+
+        // Pega os valores
+        const novoRelatorio = {
+            id: Date.now(),
+            professor: document.getElementById('nome-professor').value,
+            materia: document.getElementById('materia').value,
+            turma: document.getElementById('turma').value,
+            horaInicio: inicio,
+            horaFim: fim,
+            status: document.getElementById('status-sala').value,
+            comentario: document.getElementById('comentario').value,
+            dataEnvio: new Date().toLocaleString('pt-BR')
+        };
+
+        // Adiciona à lista e salva no navegador (LocalStorage)
+        relatorios.push(novoRelatorio);
+        localStorage.setItem('relatorios_sala_professores', JSON.stringify(relatorios));
+
+        // Limpa o formulário
+        form.reset();
+
+        // Atualiza a tela
+        renderizarRelatorios();
+        
+        alert("✅ Relatório enviado e salvo com sucesso!");
+    });
+
+    // Renderiza os relatórios assim que a página carrega
+    window.onload = renderizarRelatorios;
+</script>
+</body>
+</html>
